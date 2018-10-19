@@ -1,9 +1,7 @@
 package com.transactions.accounttransaction.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -39,7 +37,7 @@ public class Transaction implements Serializable {
     @Column
     private Date createDate;
 
-    public Transaction(final BigDecimal transactionValue, final String operation, final Account originAccount, final Account targetAccount, final Date createDate){
+    public Transaction(final BigDecimal transactionValue, final String operation, final Account originAccount, final Account targetAccount, final Date createDate) {
         this.transactionValue = transactionValue;
         this.operation = operation;
         this.originAccount = originAccount;

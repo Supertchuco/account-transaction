@@ -35,19 +35,19 @@ public class AccountService {
         }
 
         Client client = clientRepository.findClientId(createAccountVO.getClientId());
-        if(Objects.isNull(client)){
+        if (Objects.isNull(client)) {
             log.error("Client not found with this client id: {}", createAccountVO.getClientId());
             throw new ClientNotFoundException();
         }
 
-        if(CollectionUtils.isEmpty(client.getAccounts())){
+        if (CollectionUtils.isEmpty(client.getAccounts())) {
             client.setAccounts(new ArrayList<>());
         }
 
         try {
             client.getAccounts().add(new Account(createAccountVO.getAccountId(), createAccountVO.getAccountBalance(), client, new Date()));
             return clientRepository.save(client);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error to save account", e);
             throw new SaveAccountException();
         }
@@ -62,12 +62,12 @@ public class AccountService {
         return false;
     }
 
-    public Account findAccountByAccountId(final int accountId){
+    public Account findAccountByAccountId(final int accountId) {
         log.info("Find account by account id: {}", accountId);
         return accountRepository.findByAccountId(accountId);
     }
 
-    public Account saveAccount(final Account account){
+    public Account saveAccount(final Account account) {
         log.info("save account with account id: {}", account.getAccountId());
         return accountRepository.save(account);
     }

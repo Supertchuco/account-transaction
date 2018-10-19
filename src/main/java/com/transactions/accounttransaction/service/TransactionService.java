@@ -46,14 +46,17 @@ public class TransactionService {
         OriginAccountHasBalanceToAccountTransfer(originAccount, performMoneyAccountTransferTransactionVO.getTransactionValue());
 
         try {
-            originAccount.getAccountBalance().subtract(performMoneyAccountTransferTransactionVO.getTransactionValue());
-            targetAccount.getAccountBalance().add(performMoneyAccountTransferTransactionVO.getTransactionValue());
+            originAccount.setAccountBalance(originAccount.getAccountBalance().
+                    subtract(performMoneyAccountTransferTransactionVO.getTransactionValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
+            targetAccount.setAccountBalance(targetAccount.getAccountBalance().
+                    add(performMoneyAccountTransferTransactionVO.getTransactionValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
             log.info("Update origin account balance on database");
             accountService.saveAccount(originAccount);
             log.info("Update target account balance on database");
             accountService.saveAccount(targetAccount);
             log.info("Create transaction registry on database");
-            return transactionRepository.save(new Transaction(performMoneyAccountTransferTransactionVO.getTransactionValue(), TRANSFER_TRANSACTION, originAccount, targetAccount, new Date()));
+            return transactionRepository.
+                    save(new Transaction(performMoneyAccountTransferTransactionVO.getTransactionValue(), TRANSFER_TRANSACTION, originAccount, targetAccount, new Date()));
         } catch (Exception e) {
             log.error("Error to update accounts balance", e);
             throw new PerformMoneyAccountTransferTransactionException();
