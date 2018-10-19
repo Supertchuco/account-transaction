@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Entity(name = "Account")
@@ -18,7 +19,6 @@ public class Account implements Serializable {
 
     @Id
     @Column
-    @GeneratedValue
     private int accountId;
 
     @Column
@@ -28,4 +28,8 @@ public class Account implements Serializable {
     @JsonManagedReference
     @JoinColumn(name = "clientId", nullable = false)
     private Client client;
+
+    @Column
+    private Date createDate;
+
 }

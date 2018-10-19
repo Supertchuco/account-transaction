@@ -19,7 +19,6 @@ public class Client implements Serializable {
 
     @Id
     @Column
-    @GeneratedValue
     private int clientId;
 
     @Column
