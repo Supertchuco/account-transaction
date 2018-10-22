@@ -10,6 +10,7 @@ import com.transactions.accounttransaction.vo.PerformMoneyAccountTransferTransac
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -43,32 +44,44 @@ public class TransactionService {
             throw new OriginAccountNotFoundException();
         }
 
-        OriginAccountHasBalanceToAccountTransfer(originAccount, performMoneyAccountTransferTransactionVO.getTransactionValue());
+        originAccountHasBalanceToAccountTransfer(originAccount, performMoneyAccountTransferTransactionVO.getTransactionValue());
+        return doMoneyTransfer(originAccount, targetAccount, performMoneyAccountTransferTransactionVO.getTransactionValue());
+    }
 
+    @Transactional
+    private Transaction doMoneyTransfer(Account originAccount, Account targetAccount, BigDecimal transactionValue) {
+        log.info("Do money transfer");
         try {
-            originAccount.setAccountBalance(originAccount.getAccountBalance().
-                    subtract(performMoneyAccountTransferTransactionVO.getTransactionValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
-            targetAccount.setAccountBalance(targetAccount.getAccountBalance().
-                    add(performMoneyAccountTransferTransactionVO.getTransactionValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
+            originAccount.setAccountBalance(debitValueIntoOriginAccountBalance(originAccount.getAccountBalance(), transactionValue));
+            targetAccount.setAccountBalance(addValueIntoTargetAccountBalance(targetAccount.getAccountBalance(), transactionValue));
             log.info("Update origin account balance on database");
             accountService.saveAccount(originAccount);
             log.info("Update target account balance on database");
             accountService.saveAccount(targetAccount);
             log.info("Create transaction registry on database");
             return transactionRepository.
-                    save(new Transaction(performMoneyAccountTransferTransactionVO.getTransactionValue(), TRANSFER_TRANSACTION, originAccount, targetAccount, new Date()));
+                    save(new Transaction(transactionValue, TRANSFER_TRANSACTION, originAccount, targetAccount, new Date()));
         } catch (Exception e) {
             log.error("Error to update accounts balance", e);
             throw new PerformMoneyAccountTransferTransactionException();
         }
     }
 
-    private void OriginAccountHasBalanceToAccountTransfer(final Account originAccount, final BigDecimal valueToTransfer) {
+    private BigDecimal debitValueIntoOriginAccountBalance(final BigDecimal originAccountBalance, final BigDecimal transactionValue) {
+        log.info("Debit value into origin account");
+        return originAccountBalance.subtract(transactionValue).setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    private BigDecimal addValueIntoTargetAccountBalance(final BigDecimal targetAccountBalance, final BigDecimal transactionValue) {
+        log.info("Add value into origin account");
+        return targetAccountBalance.add(transactionValue).setScale(2, BigDecimal.ROUND_HALF_UP);
+    }
+
+    private void originAccountHasBalanceToAccountTransfer(final Account originAccount, final BigDecimal valueToTransfer) {
         if (originAccount.getAccountBalance().compareTo(valueToTransfer) == -1) {
             log.error("Origin Client account balance: {} is not enough to transfer this value: {}", originAccount.getAccountBalance(), valueToTransfer);
             throw new OriginAccountBalanceIsNotEnoughException();
         }
     }
-
 
 }

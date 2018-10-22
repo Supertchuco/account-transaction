@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ClientRepository extends CrudRepository<Client, Long> {
 
-    Client findClientId(final int clientId);
+    Client findById(final int clientId);
 
     @Query("SELECT client FROM Client client WHERE client.account.accountId = :accountId ")
     Client findCLientByAccountId(final @Param("accountId") int accountId);

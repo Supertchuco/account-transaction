@@ -19,7 +19,8 @@ public class ClientService {
 
     public Client createClient(final Client client) {
         log.info("Create new client");
-        if (existClientIdOnDatabase(client.getClientId())) {
+        Client dbClient = clientRepository.findById(client.getClientId());
+        if (!Objects.isNull(dbClient)) {
             log.error("This client id: {} already exist in our database", client.getClientId());
             throw new ClientIdAlreadyExistOnDatabaseException();
         }
@@ -33,13 +34,12 @@ public class ClientService {
         }
     }
 
-    public boolean existClientIdOnDatabase(final int clientId) {
-        log.info("Check if exist a client with this client id: {}", clientId);
-        Client client = clientRepository.findClientId(clientId);
-        if (!Objects.isNull(client)) {
-            return true;
-        }
-        return false;
+    public Client findClientByClientId(final int clientId){
+        return clientRepository.findById(clientId);
+    }
+
+    public Client saveClient(final Client client){
+        return clientRepository.save(client);
     }
 
 }

@@ -13,6 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
@@ -25,16 +26,18 @@ public class AccountService {
     AccountRepository accountRepository;
 
     @Autowired
-    ClientRepository clientRepository;
+    ClientService clientService;
 
     public Client createAccount(CreateAccountVO createAccountVO) {
         log.info("Create account for this client id {} with account id {}", createAccountVO.getClientId(), createAccountVO.getAccountId());
-        if (existAccountIdOnDatabase(createAccountVO.getAccountId())) {
+
+        Account dbAccount = accountRepository.findByAccountId(createAccountVO.getAccountId());
+        if (!Objects.isNull(dbAccount)) {
             log.error("This account id: {} already exist in our database", createAccountVO.getAccountId());
             throw new AccountdAlreadyExistOnDatabaseException();
         }
 
-        Client client = clientRepository.findClientId(createAccountVO.getClientId());
+        Client client = clientService.findClientByClientId(createAccountVO.getClientId());
         if (Objects.isNull(client)) {
             log.error("Client not found with this client id: {}", createAccountVO.getClientId());
             throw new ClientNotFoundException();
@@ -45,21 +48,12 @@ public class AccountService {
         }
 
         try {
-            client.getAccounts().add(new Account(createAccountVO.getAccountId(), createAccountVO.getAccountBalance(), client, new Date()));
-            return clientRepository.save(client);
+            client.getAccounts().add(new Account(createAccountVO.getAccountId(), (Objects.isNull(createAccountVO.getAccountBalance())) ? new BigDecimal("0.00") : createAccountVO.getAccountBalance().setScale(2, BigDecimal.ROUND_HALF_UP), client, new Date()));
+            return clientService.saveClient(client);
         } catch (Exception e) {
             log.error("Error to save account", e);
             throw new SaveAccountException();
         }
-    }
-
-    public boolean existAccountIdOnDatabase(final int accountId) {
-        log.info("Check if exist a account with this account id: {}", accountId);
-        Account account = accountRepository.findByAccountId(accountId);
-        if (!Objects.isNull(account)) {
-            return true;
-        }
-        return false;
     }
 
     public Account findAccountByAccountId(final int accountId) {

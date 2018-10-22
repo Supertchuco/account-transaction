@@ -3,7 +3,6 @@ package com.transactions.accounttransaction.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,7 +13,6 @@ import java.util.Date;
 @Entity(name = "Account")
 @Table(name = "Account")
 @AllArgsConstructor
-@NoArgsConstructor
 public class Account implements Serializable {
 
     @Id
@@ -31,5 +29,19 @@ public class Account implements Serializable {
 
     @Column
     private Date createDate;
+
+    public Account(final int accountId, final Client client) {
+        this.accountId = accountId;
+        this.client = client;
+        this.accountBalance = new BigDecimal("00.00");
+        this.createDate = new Date();
+    }
+
+    public Account(final int accountId, final Client client, final BigDecimal accountBalance) {
+        this.accountId = accountId;
+        this.client = client;
+        this.accountBalance = accountBalance;
+        this.createDate = new Date();
+    }
 
 }

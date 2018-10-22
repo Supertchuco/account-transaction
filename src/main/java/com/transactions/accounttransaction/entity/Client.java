@@ -14,7 +14,6 @@ import java.util.List;
 @Entity(name = "Client")
 @Table(name = "Client")
 @AllArgsConstructor
-@NoArgsConstructor
 public class Client implements Serializable {
 
     @Id
@@ -27,4 +26,9 @@ public class Client implements Serializable {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Account> accounts;
+
+    public Client (final int clientId, final String email){
+        this.clientId = clientId;
+        this.email = email;
+    }
 }
