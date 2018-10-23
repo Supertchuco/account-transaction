@@ -1,0 +1,4 @@
+DELETE FROM CLIENT WHERE id = 2;
+
+
+
