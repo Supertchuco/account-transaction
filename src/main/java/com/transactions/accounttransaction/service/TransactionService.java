@@ -5,8 +5,9 @@ import com.transactions.accounttransaction.entity.Transaction;
 import com.transactions.accounttransaction.exception.OriginAccountBalanceIsNotEnoughException;
 import com.transactions.accounttransaction.exception.OriginAccountNotFoundException;
 import com.transactions.accounttransaction.exception.PerformMoneyAccountTransferTransactionException;
+import com.transactions.accounttransaction.exception.TargetAccountNotFoundException;
 import com.transactions.accounttransaction.repository.TransactionRepository;
-import com.transactions.accounttransaction.vo.PerformMoneyAccountTransferTransactionVO;
+import com.transactions.accounttransaction.vo.PerformMoneyTransferVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,24 +29,24 @@ public class TransactionService {
     @Autowired
     TransactionRepository transactionRepository;
 
-    public Transaction performMoneyAccountTransferTransaction(final PerformMoneyAccountTransferTransactionVO performMoneyAccountTransferTransactionVO) {
+    public Transaction performMoneyAccountTransferTransaction(final PerformMoneyTransferVO performMoneyTransferVO) {
         log.info("perform money account transaction between account origin account id: {} and target account id: {}",
-                performMoneyAccountTransferTransactionVO.getOriginAccountId(), performMoneyAccountTransferTransactionVO.getTargetAccountId());
+                performMoneyTransferVO.getOriginAccountId(), performMoneyTransferVO.getTargetAccountId());
 
-        Account originAccount = accountService.findAccountByAccountId(performMoneyAccountTransferTransactionVO.getOriginAccountId());
+        Account originAccount = accountService.findAccountByAccountId(performMoneyTransferVO.getOriginAccountId());
         if (Objects.isNull(originAccount)) {
-            log.error("Origin account not found with this account id: {}", performMoneyAccountTransferTransactionVO.getOriginAccountId());
-            throw new OriginAccountNotFoundException();
+            log.error("Origin account not found with this account id: {}", performMoneyTransferVO.getOriginAccountId());
+            throw new OriginAccountNotFoundException(String.format("Origin account not found with this account id: %d", performMoneyTransferVO.getOriginAccountId()));
         }
 
-        Account targetAccount = accountService.findAccountByAccountId(performMoneyAccountTransferTransactionVO.getTargetAccountId());
+        Account targetAccount = accountService.findAccountByAccountId(performMoneyTransferVO.getTargetAccountId());
         if (Objects.isNull(targetAccount)) {
-            log.error("Target account not found with this account id: {}", performMoneyAccountTransferTransactionVO.getTargetAccountId());
-            throw new OriginAccountNotFoundException();
+            log.error("Target account not found with this account id: {}", performMoneyTransferVO.getTargetAccountId());
+            throw new TargetAccountNotFoundException(String.format("Target account not found with this account id: {}", performMoneyTransferVO.getTargetAccountId()));
         }
 
-        originAccountHasBalanceToAccountTransfer(originAccount, performMoneyAccountTransferTransactionVO.getTransactionValue());
-        return doMoneyTransfer(originAccount, targetAccount, performMoneyAccountTransferTransactionVO.getTransactionValue());
+        originAccountHasBalanceToAccountTransfer(originAccount, performMoneyTransferVO.getTransactionValue());
+        return doMoneyTransfer(originAccount, targetAccount, performMoneyTransferVO.getTransactionValue());
     }
 
     @Transactional
@@ -63,7 +64,7 @@ public class TransactionService {
                     save(new Transaction(transactionValue, TRANSFER_TRANSACTION, originAccount, targetAccount, new Date()));
         } catch (Exception e) {
             log.error("Error to update accounts balance", e);
-            throw new PerformMoneyAccountTransferTransactionException();
+            throw new PerformMoneyAccountTransferTransactionException("Error to update accounts balance");
         }
     }
 
@@ -80,7 +81,7 @@ public class TransactionService {
     private void originAccountHasBalanceToAccountTransfer(final Account originAccount, final BigDecimal valueToTransfer) {
         if (originAccount.getAccountBalance().compareTo(valueToTransfer) == -1) {
             log.error("Origin Client account balance: {} is not enough to transfer this value: {}", originAccount.getAccountBalance(), valueToTransfer);
-            throw new OriginAccountBalanceIsNotEnoughException();
+            throw new OriginAccountBalanceIsNotEnoughException(String.format("Origin Client account balance: %f is not enough to transfer this value: %f", originAccount.getAccountBalance(), valueToTransfer));
         }
     }
 

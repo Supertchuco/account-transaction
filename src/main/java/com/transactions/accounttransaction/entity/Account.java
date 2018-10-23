@@ -24,7 +24,7 @@ public class Account implements Serializable {
 
     @ManyToOne
     @JsonManagedReference
-    @JoinColumn(name = "clientId", nullable = false)
+    @JoinColumn(name = "id", nullable = false)
     private Client client;
 
     @Column

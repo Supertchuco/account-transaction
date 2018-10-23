@@ -24,14 +24,15 @@ public class SwaggerConfig {
 
     private Predicate<String> postPaths() {
         return or(
-             //   regex("/product.*"),
-                regex("/v1/assets.*")
+                regex("/account.*"),
+                regex("/client.*"),
+                regex("/transaction.*")
         );
     }
 
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("Parking Management")
-                .description("Product Management API reference for developers")
+        return new ApiInfoBuilder().title("Account Transaction API")
+                .description("Account Transaction API reference for developers")
                 .contact("rafael.whatsthestory@gmail.com").version("1.0").build();
     }
 

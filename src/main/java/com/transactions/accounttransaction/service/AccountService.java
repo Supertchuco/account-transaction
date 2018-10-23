@@ -28,19 +28,19 @@ public class AccountService {
     @Autowired
     ClientService clientService;
 
-    public Client createAccount(CreateAccountVO createAccountVO) {
+    public Client createAccount(final CreateAccountVO createAccountVO) {
         log.info("Create account for this client id {} with account id {}", createAccountVO.getClientId(), createAccountVO.getAccountId());
 
         Account dbAccount = accountRepository.findByAccountId(createAccountVO.getAccountId());
         if (!Objects.isNull(dbAccount)) {
             log.error("This account id: {} already exist in our database", createAccountVO.getAccountId());
-            throw new AccountdAlreadyExistOnDatabaseException();
+            throw new AccountdAlreadyExistOnDatabaseException(String.format("This account id: %d already exist in our database", createAccountVO.getAccountId()));
         }
 
         Client client = clientService.findClientByClientId(createAccountVO.getClientId());
         if (Objects.isNull(client)) {
             log.error("Client not found with this client id: {}", createAccountVO.getClientId());
-            throw new ClientNotFoundException();
+            throw new ClientNotFoundException((String.format("Client not found with this client id: %d", createAccountVO.getClientId())));
         }
 
         if (CollectionUtils.isEmpty(client.getAccounts())) {

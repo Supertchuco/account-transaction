@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-public class PerformMoneyAccountTransferTransactionVO implements Serializable {
+public class PerformMoneyTransferVO implements Serializable {
 
     private BigDecimal transactionValue;
 

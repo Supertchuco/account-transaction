@@ -31,7 +31,7 @@ public class Transaction implements Serializable {
 
     @OneToOne
     @JsonManagedReference
-    @JoinColumn(name = "accountId", nullable = false)
+    @JoinColumn(name = "account", nullable = false)
     private Account targetAccount;
 
     @Column

@@ -4,7 +4,6 @@ package com.transactions.accounttransaction.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -18,7 +17,7 @@ public class Client implements Serializable {
 
     @Id
     @Column
-    private int clientId;
+    private int id;
 
     @Column
     private String email;
@@ -27,8 +26,8 @@ public class Client implements Serializable {
     @JsonManagedReference
     private List<Account> accounts;
 
-    public Client (final int clientId, final String email){
-        this.clientId = clientId;
+    public Client (final int id, final String email){
+        this.id = id;
         this.email = email;
     }
 }
