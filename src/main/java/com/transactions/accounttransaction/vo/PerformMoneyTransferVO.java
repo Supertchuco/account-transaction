@@ -10,8 +10,6 @@ public class PerformMoneyTransferVO implements Serializable {
 
     private BigDecimal transactionValue;
 
-    private String operation;
-
     private int originAccountId;
 
     private int targetAccountId;

@@ -62,10 +62,55 @@ public class AccountTransactionIntegrationTest {
 
     @Test
     public void shouldReturn400WhenCreateNewAccountWithIdAlreadyExist() {
-        String payload = readJSON("request/createAccountSuccess.json");
+        String payload = readJSON("request/createAccountWithAccountIdAlreadyExist.json");
         HttpEntity<String> entity = new HttpEntity<String>(payload, buildHttpHeaders());
         ResponseEntity<String> response = testRestTemplate.exchange(requestEndpointBase.concat("/account/createAccount"), HttpMethod.POST, entity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(StringUtils.contains(response.getBody(), "This account id: 3 already exist in our database" ));
+    }
+
+    @Test
+    public void shouldReturn400WhenCreateNewAccountWithClientNotExistOnDatabase() {
+        String payload = readJSON("request/createAccountWithClientNotExist.json");
+        HttpEntity<String> entity = new HttpEntity<String>(payload, buildHttpHeaders());
+        ResponseEntity<String> response = testRestTemplate.exchange(requestEndpointBase.concat("/account/createAccount"), HttpMethod.POST, entity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(StringUtils.contains(response.getBody(), "Client not found with this client id:" ));
+    }
+
+    @Test
+    public void shouldReturn200WhenPerformNewMoneyTransactionWithSuccess() {
+        String payload = readJSON("request/doMoneyTransactionWithSuccess.json");
+        HttpEntity<String> entity = new HttpEntity<String>(payload, buildHttpHeaders());
+        ResponseEntity<String> response = testRestTemplate.exchange(requestEndpointBase.concat("/transaction/doTransferMoney"), HttpMethod.POST, entity, String.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void shouldReturn400WhenPerformNewMoneyTransactionWithOriginAccountNotFound() {
+        String payload = readJSON("request/doMoneyTransactionWithOriginAccountNotFound.json");
+        HttpEntity<String> entity = new HttpEntity<String>(payload, buildHttpHeaders());
+        ResponseEntity<String> response = testRestTemplate.exchange(requestEndpointBase.concat("/transaction/doTransferMoney"), HttpMethod.POST, entity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(StringUtils.contains(response.getBody(), "Origin account not found with this account id: 25" ));
+    }
+
+    @Test
+    public void shouldReturn400WhenPerformNewMoneyTransactionWithTargetAccountNotFound() {
+        String payload = readJSON("request/doMoneyTransactionWithTargetAccountNotFound.json");
+        HttpEntity<String> entity = new HttpEntity<String>(payload, buildHttpHeaders());
+        ResponseEntity<String> response = testRestTemplate.exchange(requestEndpointBase.concat("/transaction/doTransferMoney"), HttpMethod.POST, entity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(StringUtils.contains(response.getBody(), "Target account not found with this account id: 26" ));
+    }
+
+    @Test
+    public void shouldReturn400WhenPerformNewMoneyTransactionWithOriginAccountHasNoBalance() {
+        String payload = readJSON("request/doMoneyTransactionWithOriginAccountHasNoBalance.json");
+        HttpEntity<String> entity = new HttpEntity<String>(payload, buildHttpHeaders());
+        ResponseEntity<String> response = testRestTemplate.exchange(requestEndpointBase.concat("/transaction/doTransferMoney"), HttpMethod.POST, entity, String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(StringUtils.contains(response.getBody(), "Origin Client account balance: 0,00 is not enough to transfer this value: 100,50" ));
     }
 
 }

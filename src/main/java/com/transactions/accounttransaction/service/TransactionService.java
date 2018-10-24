@@ -29,7 +29,7 @@ public class TransactionService {
     @Autowired
     TransactionRepository transactionRepository;
 
-    public Transaction performMoneyAccountTransferTransaction(final PerformMoneyTransferVO performMoneyTransferVO) {
+    public Transaction performMoneyTransferTransaction(final PerformMoneyTransferVO performMoneyTransferVO) {
         log.info("perform money account transaction between account origin account id: {} and target account id: {}",
                 performMoneyTransferVO.getOriginAccountId(), performMoneyTransferVO.getTargetAccountId());
 
@@ -42,7 +42,7 @@ public class TransactionService {
         Account targetAccount = accountService.findAccountByAccountId(performMoneyTransferVO.getTargetAccountId());
         if (Objects.isNull(targetAccount)) {
             log.error("Target account not found with this account id: {}", performMoneyTransferVO.getTargetAccountId());
-            throw new TargetAccountNotFoundException(String.format("Target account not found with this account id: {}", performMoneyTransferVO.getTargetAccountId()));
+            throw new TargetAccountNotFoundException(String.format("Target account not found with this account id: %d", performMoneyTransferVO.getTargetAccountId()));
         }
 
         originAccountHasBalanceToAccountTransfer(originAccount, performMoneyTransferVO.getTransactionValue());
@@ -50,7 +50,7 @@ public class TransactionService {
     }
 
     @Transactional
-    private Transaction doMoneyTransfer(Account originAccount, Account targetAccount, BigDecimal transactionValue) {
+    private Transaction doMoneyTransfer(final Account originAccount, final Account targetAccount, final BigDecimal transactionValue) {
         log.info("Do money transfer");
         try {
             originAccount.setAccountBalance(debitValueIntoOriginAccountBalance(originAccount.getAccountBalance(), transactionValue));
@@ -80,8 +80,8 @@ public class TransactionService {
 
     private void originAccountHasBalanceToAccountTransfer(final Account originAccount, final BigDecimal valueToTransfer) {
         if (originAccount.getAccountBalance().compareTo(valueToTransfer) == -1) {
-            log.error("Origin Client account balance: {} is not enough to transfer this value: {}", originAccount.getAccountBalance(), valueToTransfer);
-            throw new OriginAccountBalanceIsNotEnoughException(String.format("Origin Client account balance: %f is not enough to transfer this value: %f", originAccount.getAccountBalance(), valueToTransfer));
+            log.error("Origin Client account balance: {} is not enough to transfer this value: {}", originAccount.getAccountBalance().setScale(2, BigDecimal.ROUND_HALF_UP), valueToTransfer.setScale(2, BigDecimal.ROUND_HALF_UP));
+            throw new OriginAccountBalanceIsNotEnoughException(String.format("Origin Client account balance: %.2f is not enough to transfer this value: %.2f", originAccount.getAccountBalance(), valueToTransfer));
         }
     }
 

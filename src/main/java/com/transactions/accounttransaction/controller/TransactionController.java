@@ -18,7 +18,7 @@ public class TransactionController {
 
     @RequestMapping(value = "/doTransferMoney", method = RequestMethod.POST)
     public Transaction doTransferMoney(final @RequestBody PerformMoneyTransferVO performMoneyTransferVO) {
-        return transactionService.performMoneyAccountTransferTransaction(performMoneyTransferVO);
+        return transactionService.performMoneyTransferTransaction(performMoneyTransferVO);
     }
 
 }
